@@ -36,7 +36,8 @@ const get_subtitles_from_programid = async (programid) => {
     const subtitleurl = `http://psapi-granitt-prod-we.cloudapp.net/programs/${programid}/subtitles/tt`;
     const response = await axios.get(subtitleurl)
     const sentence_strings = ttml_to_text(String(response.data));
-    return sentence_strings;
+    const sentences_filtered = sentence_strings.filter(item => item !== "undefined" ? item : null)
+    return sentences_filtered;
 }
 
 // Get subtitles for a given Program ID
@@ -53,78 +54,19 @@ router.get('/subtitles', async (ctx, next) => {
     ctx.body = "";
 })
 
-// Translate and POS tag subtitles
-router.get('/context', async (ctx, next) => {
-    const programid = ctx.request.query.programid
+// Tokenise a sentence to get the POS
+router.get('/tokenise', async (ctx, next) => {
+    const sentencestring = ctx.request.query.sentence
 
+    // Tokenise using python server
+    const analysis = await axios.post("http://localhost:9000", {
+        sentence: sentencestring
+    })
 
-    if(programid) {
-        const sentence_strings = await get_subtitles_from_programid(programid);
-
-        const all_text = sentence_strings.join('');
-
-        const analysis = await axios.post("http://localhost:9000", {
-            sentence: all_text
-        })
-
-        ctx.body = analysis.data;
-        return;
-    }
-
-    ctx.body = "";
+    ctx.body = analysis.data;
 })
 
 app.use(cors());
 app.use(router.routes());
 app.use(router.allowedMethods());
 app.listen(3000);
-
-
-/*
-router.get('/programid', (ctx, next) => {
-    console.log(ctx.body)
-    ctx.body = "Nope";
-});
-
-app
-    .use(router.routes())
-    .use(router.allowedMethods())
-    .listen(3000)
-
-const programid = 'KMTE62005921';
-const subtitleurl = `http://psapi-granitt-prod-we.cloudapp.net/programs/${programid}/subtitles/tt`
-
-const apikey = process.env.TRANSLATE_API_KEY;
-
-// Spawn analyser server - server responds to GET requests
-
-
-/*
-setTimeout(() => {
-    (async () => {
-        const response = await fetch(subtitleurl)
-        const body = await response.text()
-    
-        const sentence_strings = ttml_to_text(body);
-        
-        const analysis_res = await fetch('http://localhost:9000', { 
-            method: 'post', 
-            body: JSON.stringify({
-                "sentence": sentence_strings[1],
-            }),
-            headers: {'Content-Type': 'application/json'}
-        })
-
-        const analysis = await analysis_res.json()
-
-        console.log(analysis)
-    })()
-}, 1500)*/
-
-//extract_program_id('https://tv.nrk.no/serie/mobilfloert/sesong/1/episode/1/avspiller');
-
-/*
-translate_from_no("hei alle sammen", process.env.TRANSLATE_API_KEY).then(data => {
-    console.log(data)
-})
-*/

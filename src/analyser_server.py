@@ -1,25 +1,30 @@
-import nltk
-import json
 import falcon
 from wsgiref import simple_server
+import spacy
+from spacy.morphology import Morphology
+
+# Load training for Norwegan Bokmål
+nlp = spacy.load("nb_core_news_sm")
 
 class Analyser:
     def on_post(self, req, resp):
         resp.media = analyse_sentence(req.media['sentence'])
 
 def analyse_sentence(sentence):
-    stemmer = nltk.stem.SnowballStemmer('norwegian');
+    doc = nlp(sentence)
 
-    tokens = nltk.word_tokenize(sentence)
-    stems = list(map(lambda token: stemmer.stem(token), tokens))
-    pos = nltk.pos_tag(tokens)
+    response = {
+        'tokens': [],
+        'lemma': [],
+        'pos': [],
+        'morph': []
+    }
 
-    response = dict()
-
-    # Format response as JSON
-    response['tokens'] = tokens;
-    response['stems'] = stems;
-    response['pos'] = pos;
+    for token in doc:
+        response['tokens'].append(token.text)
+        response['lemma'].append(token.lemma_)
+        response['pos'].append(token.pos_)
+        response['morph'].append(Morphology.feats_to_dict(str(token.morph)))
 
     return response
 
