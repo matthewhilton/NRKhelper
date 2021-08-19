@@ -1,6 +1,6 @@
 import convert from 'xml-js';
 import lodash from 'lodash';
-const { map, join, flatten, trim } = lodash;
+const { map, flatten, split } = lodash;
 
 /**
  * Converts Timed Text Markup Language (TTML) subtitles to a string array
@@ -21,7 +21,9 @@ export const ttml_to_text = (ttml) => {
     const elements = flatten(eventelements)
     
     const textlines = map(elements, 'text'); 
-    const textlinescleaned = map(textlines, item => item.replace(/-/g, ""))
+
+    const dashregex = new RegExp('-', 'g');
+    const textlinescleaned = textlines.map((line) => new String(line).replace(dashregex, ""))
 
     return textlinescleaned;
 }
