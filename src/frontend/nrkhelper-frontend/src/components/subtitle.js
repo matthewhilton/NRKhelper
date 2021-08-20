@@ -1,5 +1,7 @@
+import { Button } from 'react-bootstrap'
+
 const Subtitle = ({text, onClick = () => {} }) => {
-    return <button onClick={() => onClick(text)}> {text} </button>;
+    return <Button variant="dark" onClick={() => onClick(text)} style={{margin: 2}}> {text} </Button>;
 }
 
 export default Subtitle;

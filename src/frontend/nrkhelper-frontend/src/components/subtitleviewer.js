@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CardGroup, Card } from "react-bootstrap";
 import useSWR from "swr";
 import Subtitle from "./subtitle";
 
@@ -16,11 +17,16 @@ const SubtitleViewer = ({programId, onSubtitleClicked = () => {}}) => {
     const subtitleElements = filteredElements.map(subtitle => <Subtitle text={subtitle} onClick={(item) => onSubtitleClicked(item)}/>);
 
     return(
-        <div>
-            <h1> Subtitles </h1>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} />
-            <h2> {subtitleElements} </h2>
-        </div>
+        <Card>
+            <Card.Body>
+                <Card.Title>
+                    Subtitles
+                </Card.Title>
+                <CardGroup>
+                    {subtitleElements}
+                </CardGroup>
+            </Card.Body>
+        </Card>
     )
 }
 

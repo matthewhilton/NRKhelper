@@ -4,9 +4,11 @@ import Koa from 'koa';
 import cors from '@koa/cors';
 import Router from 'koa-router';
 import axios from 'axios';
+import _ from 'lodash';
 import {ttml_to_text} from './src/ttml.js';
-
 import {extract_program_id} from "./src/extract_id.js"
+
+const { map } = _;
 
 dotenv.config()
 
@@ -40,6 +42,29 @@ const get_subtitles_from_programid = async (programid) => {
     return sentences_filtered;
 }
 
+let subtitle_cache = {};
+const cache_subtitles_analysis = async (programid) => {
+
+    if(subtitle_cache[programid] !== undefined) {
+        return;
+    }
+
+    console.log(`Program ${programid} has no subtitles cached`)
+
+    const subtitles = await get_subtitles_from_programid(programid);
+    const subtitle_sentence_analysis = [];
+
+    for(const sentence of subtitles) {
+        const analysis_req = await axios.post("http://localhost:9000", {
+            sentence: sentence
+        })
+        const analysis = analysis_req.data;
+        subtitle_sentence_analysis.push(analysis);
+    }
+    
+    subtitle_cache[programid] = subtitle_sentence_analysis;
+}
+
 // Get subtitles for a given Program ID
 router.get('/subtitles', async (ctx, next) => {
     const programid = ctx.request.query.programid
@@ -64,6 +89,25 @@ router.get('/tokenise', async (ctx, next) => {
     })
 
     ctx.body = analysis.data;
+})
+
+// Get similar sentences using tokenisation data
+router.get('/context', async (ctx, next) => {
+    const word = ctx.request.query.word
+    const programid = ctx.request.query.programid
+
+    await cache_subtitles_analysis(programid)
+    const program_subtitle_analysis = subtitle_cache[programid]
+
+    const word_analysis = await axios.post("http://localhost:9000", {
+        sentence: word
+    })
+
+     // Now search through the subtitle analysis and find ones with the same lemma
+    const desired_lemma = word_analysis.data.lemma[0]
+    const sentence_with_matching_lemmas = program_subtitle_analysis.filter(analysis => analysis.lemma.includes(desired_lemma))
+
+    ctx.body = sentence_with_matching_lemmas;
 })
 
 app.use(cors());

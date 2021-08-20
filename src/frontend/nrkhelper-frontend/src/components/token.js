@@ -1,48 +1,25 @@
-const posMap = {
-    "CC": 'Coordinating Conjunction',
-    "CD": 'Cardinal Digit',
-    "DT":'Determiner',
-    "EX": 'Existential There. Example: “there is” … think of it like “there exists”)',
-    "FW": 'Foreign Word.',
-    "IN": 'Preposition/Subordinating Conjunction.',
-    "JJ": 'Adjective.',
-    "JJR": 'Adjective, Comparative.',
-    "JJS": 'Adjective, Superlative.',
-    "LS": 'List Marker 1.',
-    "MD": 'Modal.',
-    "NN": 'Noun, Singular.',
-    'NNS':' Noun Plural.',
-    'NNP': 'Proper Noun, Singular.',
-    'NNPS': 'Proper Noun, Plural.',
-    'PDT': 'Predeterminer.',
-    'POS': 'Possessive Ending. Example: parent’s',
-    'PRP': 'Personal Pronoun. Examples: I, he, she',
-    'PRP': 'Possessive Pronoun. Examples: my, his, hers',
-    'RB': ' Adverb. Examples: very, silently,',
-    'RBR': 'Adverb, Comparative. Example: better',
-    'RBS': 'Adverb, Superlative. Example: best',
-    'RP': 'Particle. Example: give up',
-    'TO': 'to. Example: go ‘to’ the store.',
-    'UH': 'Interjection. Example: errrrrrrrm',
-    'VB': 'Verb, Base Form. Example: take',
-    'VBD': 'Verb, Past Tense. Example: took',
-    'VBG': 'Verb, Gerund/Present Participle. Example: taking',
-    'VBN': 'Verb, Past Participle. Example: taken',
-    'VBP': 'Verb, Sing Present, non-3d take',
-    'VBZ': 'Verb, 3rd person sing. present takes',
-    'WDT': ' wh-determiner. Example: which',
-    'WP': ' wh-pronoun. Example: who, what',
-    'WP': '$ possessive wh-pronoun. Example: whose',
-    'WRB': 'wh-abverb. Example: where, when',
-}
+import { Card } from "react-bootstrap"
 
 const Token = ({token, lemma, pos, morph}) => {
-    return <div style={{backgroundColor: "lightgrey", margin: "10px", padding: "10px"}}>
-        <h3> Token: {token} </h3>
-        <h4> POS: {pos} </h4>
-        <h4> Lemma: {lemma} </h4>
-        <h4> Morph: {JSON.stringify(morph)} </h4> 
-    </div>
+    if(pos === "PUNCT") return null;
+
+    return (
+        <Card style={{width: 150, height: 150}}>
+            <Card.Title>
+                {token} 
+            </Card.Title>
+            
+            <Card.Body>
+                <span class="badge text-white" style={{backgroundColor: "#00c298"}}> {pos} </span>
+                
+                <span class="badge text-white" style={{backgroundColor: "#0088c2"}}> {lemma} </span>
+                {morph.Gender ? <span class="badge text-white" style={{backgroundColor: "#3e009c"}}> {morph.Gender} </span> : null}
+                {morph.PronType ? <span class="badge text-white" style={{backgroundColor: "#5a0180"}}> {morph.PronType} </span> : null}
+                {morph.VerbForm ? <span class="badge text-white" style={{backgroundColor: "#710180"}}> {morph.VerbForm} </span> : null}
+                {morph.Tense ? <span class="badge text-white" style={{backgroundColor: "#800171"}}> {morph.Tense} </span> : null}
+            </Card.Body>
+        </Card>
+    )
 }
 
 export default Token;

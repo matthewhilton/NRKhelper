@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Card } from "react-bootstrap";
 import useSWR from 'swr'
 
 const VideoSelector = ({ onProgramId = () => {}}) => {
@@ -12,13 +13,19 @@ const VideoSelector = ({ onProgramId = () => {}}) => {
     }
     
     return (
-        <div>
-             <h2> Video Url: </h2>
-            <input value={search} onChange={(e) => setSearch(e.target.value)}/>
+        <Card>
+            <Card.Body>
+                <Card.Title>
+                Video Url
+                </Card.Title>
+
+                <input value={search} onChange={(e) => setSearch(e.target.value)}/>
             <button onClick={() => setSearchQuery(search)}> Search </button>
 
             { data && <b> Program ID: {data.programid} </b>}
-        </div>
+            
+            </Card.Body>
+        </Card>
     )
 }
 
