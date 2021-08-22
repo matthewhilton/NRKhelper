@@ -22,5 +22,5 @@ export const translate_from_no = async (text, translatekey) => {
         responseType: 'json'
     })
 
-    return JSON.stringify(response.data, null, 4)
+    return response.data;
 }

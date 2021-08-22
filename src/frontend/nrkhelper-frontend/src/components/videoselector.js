@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Button, FormControl, InputGroup } from "react-bootstrap";
 import useSWR from 'swr'
 
 const VideoSelector = ({ onProgramId = () => {}}) => {
@@ -7,10 +7,12 @@ const VideoSelector = ({ onProgramId = () => {}}) => {
     const [searchQuery, setSearchQuery] = useState(null);
 
     const { data, error } = useSWR(`http://localhost:3000/programid?url=${searchQuery}`, { refreshInterval: 0 })
+    const loading = !data && !error;
 
     if(data && data.programid) {
         onProgramId(data.programid)
     }
+
     
     return (
         <Card>
@@ -19,9 +21,12 @@ const VideoSelector = ({ onProgramId = () => {}}) => {
                 Video Url
                 </Card.Title>
 
-                <input value={search} onChange={(e) => setSearch(e.target.value)}/>
-            <button onClick={() => setSearchQuery(search)}> Search </button>
+                <InputGroup>
+                    <FormControl value={search} onChange={(e) => setSearch(e.target.value)} />
+                    <Button onClick={() => setSearchQuery(search)}> Search </Button>
+                </InputGroup>
 
+            { loading && "Loading" }
             { data && <b> Program ID: {data.programid} </b>}
             
             </Card.Body>

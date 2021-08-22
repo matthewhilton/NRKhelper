@@ -12,10 +12,8 @@ function App() {
   const [contextWord, setContextWord] = useState(null);
 
   return (
-    <div className="App">
+    <div className="App" style={{margin: 10}}>
       <h1> NRK Helper </h1>
-
-      
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
         <div style={{width: '50%'}}>

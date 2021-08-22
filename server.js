@@ -7,6 +7,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import {ttml_to_text} from './src/ttml.js';
 import {extract_program_id} from "./src/extract_id.js"
+import { translate_from_no } from './src/translator.js';
 
 const { map } = _;
 
@@ -93,8 +94,13 @@ router.get('/tokenise', async (ctx, next) => {
 
 // Get similar sentences using tokenisation data
 router.get('/context', async (ctx, next) => {
+
     const word = ctx.request.query.word
     const programid = ctx.request.query.programid
+
+    if(word == null || programid == null) {
+        return;
+    }
 
     await cache_subtitles_analysis(programid)
     const program_subtitle_analysis = subtitle_cache[programid]
@@ -107,7 +113,15 @@ router.get('/context', async (ctx, next) => {
     const desired_lemma = word_analysis.data.lemma[0]
     const sentence_with_matching_lemmas = program_subtitle_analysis.filter(analysis => analysis.lemma.includes(desired_lemma))
 
-    ctx.body = sentence_with_matching_lemmas;
+    // Also translate the word
+    const translation_resp = await translate_from_no(word, process.env.TRANSLATE_API_KEY);
+    const translation_eng = translation_resp[0]["translations"][0]["text"]
+
+    ctx.body = {
+        translation: translation_eng,
+        context: sentence_with_matching_lemmas,
+        word_lemma: desired_lemma,
+    }
 })
 
 app.use(cors());

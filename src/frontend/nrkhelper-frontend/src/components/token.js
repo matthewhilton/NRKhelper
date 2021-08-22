@@ -1,10 +1,10 @@
 import { Card } from "react-bootstrap"
 
 const Token = ({token, lemma, pos, morph}) => {
-    if(pos === "PUNCT") return null;
+    if(pos === "PUNCT" || pos === "SPACE") return null;
 
     return (
-        <Card style={{width: 150, height: 150}}>
+        <Card>
             <Card.Title>
                 {token} 
             </Card.Title>
