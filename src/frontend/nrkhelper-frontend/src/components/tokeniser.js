@@ -24,7 +24,7 @@ const Tokeniser = ({text, onTokenClicked = () => {}}) => {
 }
 
 const TokenGroup = ({text, onTokenClicked = () => {}}) => {
-    const { data, error } = useSWR(`http://localhost:3000/tokenise?sentence="${text}"`, { refreshInterval: 0 })
+    const { data, error } = useSWR(`${process.env.REACT_APP_API_ENDPOINT}/tokenise?sentence="${text}"`, { refreshInterval: 0 })
     const loading = !data && !error;
 
     if(loading) {

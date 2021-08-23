@@ -17,7 +17,7 @@ const SubtitleViewer = ({programId, onSubtitleClicked = () => {}}) => {
 }
 
 const SubtitleElements = ({programId, onSubtitleClicked = () => {}}) => {
-    const { data, error } = useSWR(`http://localhost:3000/subtitles?programid=${programId}`, { refreshInterval: 0 })
+    const { data, error } = useSWR(`${process.env.REACT_APP_API_ENDPOINT}/subtitles?programid=${programId}`, { refreshInterval: 0 })
     const [search, setSearch] = useState("");
     const loading = !data && !error;
 
@@ -31,7 +31,7 @@ const SubtitleElements = ({programId, onSubtitleClicked = () => {}}) => {
 
     const subtitles = data.subtitles;
     const filteredSubtitles = subtitles.filter(subtitle => subtitle.includes(search) || search === "");
-    const subtitleElements = filteredSubtitles.map(subtitle => <Subtitle text={subtitle} onClick={(item) => onSubtitleClicked(item)}/>);
+    const subtitleElements = filteredSubtitles.map((subtitle, i) => <Subtitle key={i} text={subtitle} onClick={(item) => onSubtitleClicked(item)}/>);
 
     return (
         <div>

@@ -16,7 +16,7 @@ const Contextualiser = ({programid, word}) => {
 }
 
 const ContextDisplay = ({programid, word}) => {
-    const { data, error } = useSWR(`http://localhost:3000/context?word=${word}&programid=${programid}`, { refreshInterval: 0 })
+    const { data, error } = useSWR(`${process.env.REACT_APP_API_ENDPOINT}/context?word=${word}&programid=${programid}`, { refreshInterval: 0 })
     const loading = !data && !error;
 
     if(loading) return "Loading...";

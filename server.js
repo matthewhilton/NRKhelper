@@ -3,24 +3,21 @@ import childprocess from "child_process";
 import Koa from 'koa';
 import cors from '@koa/cors';
 import Router from 'koa-router';
+import serve from "koa-static";
+import mount from "koa-mount";
 import axios from 'axios';
-import _ from 'lodash';
 import {ttml_to_text} from './src/ttml.js';
 import {extract_program_id} from "./src/extract_id.js"
 import { translate_from_no } from './src/translator.js';
-
-const { map } = _;
+import bodyParser from 'koa-bodyparser'
 
 dotenv.config()
 
 const app = new Koa();
 const router = new Router();
 
-//childprocess.spawn('python', ['./src/analyser_server.py']);
 
-router.get('/', async (ctx, next) => {
-    ctx.body = "It works!";
-})
+childprocess.spawn('python', ['./src/analyser_server.py']);
 
 // Convert NRK Video URL to Program ID (used in other API's)
 router.get('/programid', async (ctx, next) => {
@@ -56,7 +53,7 @@ const cache_subtitles_analysis = async (programid) => {
     const subtitle_sentence_analysis = [];
 
     for(const sentence of subtitles) {
-        const analysis_req = await axios.post("http://localhost:9000", {
+        const analysis_req = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
             sentence: sentence
         })
         const analysis = analysis_req.data;
@@ -85,7 +82,7 @@ router.get('/tokenise', async (ctx, next) => {
     const sentencestring = ctx.request.query.sentence
 
     // Tokenise using python server
-    const analysis = await axios.post("http://localhost:9000", {
+    const analysis = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
         sentence: sentencestring
     })
 
@@ -105,7 +102,7 @@ router.get('/context', async (ctx, next) => {
     await cache_subtitles_analysis(programid)
     const program_subtitle_analysis = subtitle_cache[programid]
 
-    const word_analysis = await axios.post("http://localhost:9000", {
+    const word_analysis = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
         sentence: word
     })
 
@@ -124,7 +121,30 @@ router.get('/context', async (ctx, next) => {
     }
 })
 
+router.post('/translate', async (ctx, next) => {
+    const text = ctx.request.body.text
+
+    if(!text) {
+        return;
+    }
+
+    const translation_resp = await translate_from_no(text, process.env.TRANSLATE_API_KEY);
+    const translation_eng = translation_resp[0]["translations"][0]["text"];
+
+    ctx.body = {
+        translation: translation_eng,
+    };
+})
+
+const static_pages = new Koa();
+static_pages.use(serve("./src/frontend/nrkhelper-frontend/build"));
+
 app.use(cors());
+app.use(mount("/", static_pages));
+app.use(bodyParser())
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.listen(3000);
+
+const port = process.env.PORT || 3000
+console.log(`Server starting on port ${port}`)
+app.listen(port);
