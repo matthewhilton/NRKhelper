@@ -1,23 +1,32 @@
 import { useState } from "react";
 import { Card, Button, FormControl, InputGroup } from "react-bootstrap";
 import useSWR from 'swr'
+import {apiUrl} from "../apiurl"
 
-const VideoSelector = ({ onProgramId = () => {}}) => {
-    const [search, setSearch] = useState(null);
-
+const VideoSelector = ({ onVideo = () => {}}) => {
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(false);
+ 
     const searchVideo = () => {
-        fetch(`${process.env.REACT_APP_API_ENDPOINT}/programid?url=${search}`)
+        setLoading(true);
+
+        fetch(`${apiUrl}/programid?url=${search}`)
         .then(res => res.json())
-        .then(data => onProgramId(data.programid))
+        .then(data => {
+            onVideo(data)
+            setLoading(false)
+        })
+        .catch(e => setLoading(false))
     }
 
-    
     return (
-        <Card>
+        <Card className="bg-dark">
             <Card.Body>
                 <Card.Title>
                 Video Url
                 </Card.Title>
+
+                {loading && <Card.Subtitle> Loading... </Card.Subtitle> }
 
                 <InputGroup>
                     <FormControl value={search} onChange={(e) => setSearch(e.target.value)} />

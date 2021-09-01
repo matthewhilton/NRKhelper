@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button, FormControl, InputGroup } from "react-bootstrap";
+import {apiUrl} from "../apiurl"
 
 const Translator = ({text}) => {
     const [translation, setTranslation] = useState(null);
@@ -10,7 +11,7 @@ const Translator = ({text}) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: text })
         };
-        fetch(`${process.env.REACT_APP_API_ENDPOINT}/translate`, requestOptions)
+        fetch(`${apiUrl}/translate`, requestOptions)
             .then(response => response.json())
             .then(data => setTranslation(data.translation));
     }
@@ -23,7 +24,7 @@ const Translator = ({text}) => {
             </InputGroup>
 
             {translation && 
-                <div>
+                <div style={{color: "black", marginTop: 20}}>
                     <h3> Translation: </h3>
                     <p> {translation} </p>
                 </div>

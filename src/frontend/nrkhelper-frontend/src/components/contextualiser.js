@@ -1,6 +1,7 @@
 import { Card, Button, Badge, ListGroup } from "react-bootstrap";
 import useSWR from "swr"
 import ContextItem from "./contextitem";
+import {apiUrl} from "../apiurl"
 
 const Contextualiser = ({programid, word}) => {
     return (
@@ -16,7 +17,7 @@ const Contextualiser = ({programid, word}) => {
 }
 
 const ContextDisplay = ({programid, word}) => {
-    const { data, error } = useSWR(`${process.env.REACT_APP_API_ENDPOINT}/context?word=${word}&programid=${programid}`, { refreshInterval: 0 })
+    const { data, error } = useSWR(`${apiUrl}/context?word=${word}&programid=${programid}`, { refreshInterval: 0 })
     const loading = !data && !error;
 
     if(loading) return "Loading...";
@@ -28,7 +29,7 @@ const ContextDisplay = ({programid, word}) => {
 
     return(
         <div>
-            <p style={{fontSize: '30px'}}> <span class="badge text-white" style={{backgroundColor: "#bf6230"}}> (NO) {word} </span> <span class="badge text-white" style={{backgroundColor: "#bf4830"}}> (EN) {translation} </span> </p>
+            <p style={{fontSize: '30px', textAlign: "center"}}> <span class="badge text-white" style={{backgroundColor: "#bf6230"}}> (NO) {word} </span> <span class="badge text-white" style={{backgroundColor: "#bf4830"}}> (EN) {translation} </span> </p>
             
             <b> Word found in other sentences: </b>
             <ListGroup>

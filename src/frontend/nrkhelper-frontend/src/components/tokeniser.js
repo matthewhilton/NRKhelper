@@ -1,30 +1,20 @@
 import useSWR from "swr";
 import Token from "./token";
 import { Card, CardGroup } from "react-bootstrap"
+import {apiUrl} from "../apiurl"
 
 const Tokeniser = ({text, onTokenClicked = () => {}}) => {
     
     return (
-        <Card style={{maxHeight: '60vh', overflow: 'scroll'}}> 
-            
-            <Card.Body>
-
-            <Card.Title>
-                Sentence Tokens
-            </Card.Title>
-
-            <Card.Subtitle>
-                <TokenLegend />
-            </Card.Subtitle>
-
-                {text ? <TokenGroup text={text} onTokenClicked={onTokenClicked}/> : "No Sentence" }
-            </Card.Body>
-        </Card>
+        <div>
+            <TokenLegend />
+            {text ? <TokenGroup text={text} onTokenClicked={onTokenClicked}/> : "No Sentence" }
+        </div>
     )
 }
 
 const TokenGroup = ({text, onTokenClicked = () => {}}) => {
-    const { data, error } = useSWR(`${process.env.REACT_APP_API_ENDPOINT}/tokenise?sentence="${text}"`, { refreshInterval: 0 })
+    const { data, error } = useSWR(`${apiUrl}/tokenise?sentence="${text}"`, { refreshInterval: 0 })
     const loading = !data && !error;
 
     if(loading) {

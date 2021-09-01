@@ -4,8 +4,8 @@ const Token = ({token, lemma, pos, morph}) => {
     if(pos === "PUNCT" || pos === "SPACE") return null;
 
     return (
-        <Card>
-            <Card.Title>
+        <Card style={{margin: 5, padding: 5, alignItems: "center"}}>
+            <Card.Title style={{color: "black"}}>
                 {token} 
             </Card.Title>
             

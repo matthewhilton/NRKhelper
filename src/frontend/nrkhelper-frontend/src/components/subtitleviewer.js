@@ -2,10 +2,11 @@ import { useState } from "react";
 import { CardGroup, Card, InputGroup, FormControl, Button } from "react-bootstrap";
 import useSWR from "swr";
 import Subtitle from "./subtitle";
+import {apiUrl} from "../apiurl"
 
 const SubtitleViewer = ({programId, onSubtitleClicked = () => {}}) => {
     return(
-        <Card>
+        <Card className="bg-dark" style={{borderRadius: 5}}>
             <Card.Body>
                 <Card.Title>
                     Subtitles
@@ -17,12 +18,12 @@ const SubtitleViewer = ({programId, onSubtitleClicked = () => {}}) => {
 }
 
 const SubtitleElements = ({programId, onSubtitleClicked = () => {}}) => {
-    const { data, error } = useSWR(`${process.env.REACT_APP_API_ENDPOINT}/subtitles?programid=${programId}`, { refreshInterval: 0 })
+    const { data, error } = useSWR(`${apiUrl}/subtitles?programid=${programId}`, { refreshInterval: 0 })
     const [search, setSearch] = useState("");
     const loading = !data && !error;
 
     if(loading) {
-        return "Loading...";
+        return <p> Loading... </p>;
     }
 
     if(!data) {
@@ -35,7 +36,7 @@ const SubtitleElements = ({programId, onSubtitleClicked = () => {}}) => {
 
     return (
         <div>
-            <InputGroup style={{marginBottom: 10}}>
+            <InputGroup style={{marginBottom: 10}} className="bg-dark">
                 <InputGroup.Text id="basic-addon1"> Filter </InputGroup.Text>
                 <FormControl value={search} onChange={(e) => setSearch(e.target.value)} />
             </InputGroup>

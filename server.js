@@ -7,9 +7,10 @@ import serve from "koa-static";
 import mount from "koa-mount";
 import axios from 'axios';
 import {ttml_to_text} from './src/ttml.js';
-import {extract_program_id} from "./src/extract_id.js"
+import {extract_program_data} from "./src/extract_data.js"
 import { translate_from_no } from './src/translator.js';
 import bodyParser from 'koa-bodyparser'
+import nlp from 'node-nlp';
 
 dotenv.config()
 
@@ -24,8 +25,8 @@ router.get('/programid', async (ctx, next) => {
     const nrkurl = ctx.request.query.url
 
     if(nrkurl) {
-        const programid = await extract_program_id(nrkurl);
-        ctx.body = { "programid": programid};
+        const data = await extract_program_data(nrkurl);
+        ctx.body = data;
         return;
     }
 
@@ -41,9 +42,12 @@ const get_subtitles_from_programid = async (programid) => {
 }
 
 let subtitle_cache = {};
+let translation_cache = {};
+
 const cache_subtitles_analysis = async (programid) => {
 
     if(subtitle_cache[programid] !== undefined) {
+        console.log(`${programid} subtitles are cached`);
         return;
     }
 
@@ -61,6 +65,18 @@ const cache_subtitles_analysis = async (programid) => {
     }
     
     subtitle_cache[programid] = subtitle_sentence_analysis;
+}
+
+const cache_translation = async (text) => {
+    if(translation_cache[text] !== undefined) {
+        console.log(`${text} translation is cached`);
+        return;
+    }
+
+    console.log(`${text} translation is not cached`);
+    const translation_resp = await translate_from_no(text, process.env.TRANSLATE_API_KEY);
+    const translation_eng = translation_resp[0]["translations"][0]["text"];
+    translation_cache[text] = translation_eng;
 }
 
 // Get subtitles for a given Program ID
@@ -111,8 +127,8 @@ router.get('/context', async (ctx, next) => {
     const sentence_with_matching_lemmas = program_subtitle_analysis.filter(analysis => analysis.lemma.includes(desired_lemma))
 
     // Also translate the word
-    const translation_resp = await translate_from_no(word, process.env.TRANSLATE_API_KEY);
-    const translation_eng = translation_resp[0]["translations"][0]["text"]
+    await cache_translation(word);
+    const translation_eng = translation_cache[word]
 
     ctx.body = {
         translation: translation_eng,
@@ -128,8 +144,8 @@ router.post('/translate', async (ctx, next) => {
         return;
     }
 
-    const translation_resp = await translate_from_no(text, process.env.TRANSLATE_API_KEY);
-    const translation_eng = translation_resp[0]["translations"][0]["text"];
+    await cache_translation(text);
+    const translation_eng = translation_cache[text]
 
     ctx.body = {
         translation: translation_eng,
