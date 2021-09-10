@@ -12,10 +12,10 @@ function App() {
       <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', margin: "20px", alignItems: 'center'}}>
         <div>
           <h2 style={{color: 'white', fontWeight: "bold"}}> NRKHelper </h2>
-          <Button onClick={() => setProgramData(null)} className="btn-secondary"> Change Video </Button>
+          {programData !== null && <Button onClick={() => setProgramData(null)} className="btn-secondary"> Change Video </Button> }
         </div>
        <div style={{display: "flex"}}>
-            {programData && <img style={{height: "80px", borderRadius: "10px", marginRight: "20px"}} src={programData.heroimg} />} 
+            {programData && <img style={{height: "80px", borderRadius: "10px", marginRight: "20px"}} src={programData.heroimg} alt="Video hero"/>} 
 
             {programData && 
               <div style={{display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center'}}>

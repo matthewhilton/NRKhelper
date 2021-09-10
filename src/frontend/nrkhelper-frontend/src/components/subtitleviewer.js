@@ -1,36 +1,23 @@
 import { useState } from "react";
-import { CardGroup, Card, InputGroup, FormControl, Button } from "react-bootstrap";
-import useSWR from "swr";
+import { CardGroup, Card, InputGroup, FormControl } from "react-bootstrap";
 import Subtitle from "./subtitle";
-import {apiUrl} from "../apiurl"
 
-const SubtitleViewer = ({programId, onSubtitleClicked = () => {}}) => {
+const SubtitleViewer = ({onSubtitleClicked = () => {}, subtitles}) => {
     return(
         <Card className="bg-dark" style={{borderRadius: 5}}>
             <Card.Body>
                 <Card.Title>
                     Subtitles
                 </Card.Title>
-                {programId ? <SubtitleElements programId={programId} onSubtitleClicked={onSubtitleClicked}/> : "No Program"}
+                <SubtitleElements subtitles={subtitles} onSubtitleClicked={onSubtitleClicked}/>
             </Card.Body>
         </Card>
     )
 }
 
-const SubtitleElements = ({programId, onSubtitleClicked = () => {}}) => {
-    const { data, error } = useSWR(`${apiUrl}/subtitles?programid=${programId}`, { refreshInterval: 0 })
+const SubtitleElements = ({subtitles, onSubtitleClicked = () => {}}) => {
     const [search, setSearch] = useState("");
-    const loading = !data && !error;
 
-    if(loading) {
-        return <p> Loading... </p>;
-    }
-
-    if(!data) {
-        return null;
-    }
-
-    const subtitles = data.subtitles;
     const filteredSubtitles = subtitles.filter(subtitle => subtitle.includes(search) || search === "");
     const subtitleElements = filteredSubtitles.map((subtitle, i) => <Subtitle key={i} text={subtitle} onClick={(item) => onSubtitleClicked(item)}/>);
 

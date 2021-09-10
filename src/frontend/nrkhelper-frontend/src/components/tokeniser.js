@@ -1,38 +1,29 @@
-import useSWR from "swr";
 import Token from "./token";
-import { Card, CardGroup } from "react-bootstrap"
-import {apiUrl} from "../apiurl"
+import { Button, CardGroup } from "react-bootstrap"
 
-const Tokeniser = ({text, onTokenClicked = () => {}}) => {
-    
+const Tokeniser = ({text, onTokenClicked = () => {}, analysis}) => {
+    console.log(analysis)
     return (
         <div>
             <TokenLegend />
-            {text ? <TokenGroup text={text} onTokenClicked={onTokenClicked}/> : "No Sentence" }
+            {text ? <TokenGroup text={text} onTokenClicked={onTokenClicked} analysis={analysis}/> : "No Sentence" }
         </div>
     )
 }
 
-const TokenGroup = ({text, onTokenClicked = () => {}}) => {
-    const { data, error } = useSWR(`${apiUrl}/tokenise?sentence="${text}"`, { refreshInterval: 0 })
-    const loading = !data && !error;
-
-    if(loading) {
-        return "Loading...";
-    }
-
-    if(!data) {
-        return null;
-    }
+const TokenGroup = ({text, onTokenClicked = () => {}, analysis}) => {
+    const data = analysis.find(item => item.raw === text)
 
     const tokens = data.tokens;
     const lemmas = data.lemma;
     const pos = data.pos;
     const morphology = data.morph;
-    
-    const tokenElements = tokens.map((token, index) => <a onClick={() => onTokenClicked(token)}>
-        <Token token={token} lemma={lemmas[index]} pos={pos[index]} morph={morphology[index]} />
-    </a>)
+
+    const tokenElements = tokens.map((token, index) => pos[index] !== "PUNCT" && pos[index] !== "SPACE" ?
+        <Button variant="light" onClick={() => onTokenClicked(token)}>
+            <Token token={token} lemma={lemmas[index]} pos={pos[index]} morph={morphology[index]} />
+        </Button> : 
+        null)
 
     return <CardGroup> {tokenElements} </CardGroup>
 }

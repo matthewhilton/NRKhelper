@@ -10,13 +10,11 @@ import {ttml_to_text} from './src/ttml.js';
 import {extract_program_data} from "./src/extract_data.js"
 import { translate_from_no } from './src/translator.js';
 import bodyParser from 'koa-bodyparser'
-import nlp from 'node-nlp';
 
 dotenv.config()
 
 const app = new Koa();
 const router = new Router();
-
 
 childprocess.spawn('python', ['./src/analyser_server.py']);
 
@@ -30,6 +28,7 @@ router.get('/programid', async (ctx, next) => {
         return;
     }
 
+    ctx.status = 500;
     ctx.body = "";
 })
 
@@ -54,17 +53,9 @@ const cache_subtitles_analysis = async (programid) => {
     console.log(`Program ${programid} has no subtitles cached`)
 
     const subtitles = await get_subtitles_from_programid(programid);
-    const subtitle_sentence_analysis = [];
+    const subtitle_analysis = await tokenise(subtitles);
 
-    for(const sentence of subtitles) {
-        const analysis_req = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
-            sentence: sentence
-        })
-        const analysis = analysis_req.data;
-        subtitle_sentence_analysis.push(analysis);
-    }
-    
-    subtitle_cache[programid] = subtitle_sentence_analysis;
+    subtitle_cache[programid] = subtitle_analysis;
 }
 
 const cache_translation = async (text) => {
@@ -79,30 +70,39 @@ const cache_translation = async (text) => {
     translation_cache[text] = translation_eng;
 }
 
+const tokenise = async (text) => {
+
+    // Tokenise using python server
+    if(Array.isArray(text)) {
+        // Bulk sentences
+        const analysis = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
+            sentences: text
+        })
+        return analysis.data;
+    } else {
+        // Single sentence
+        const analysis = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
+            sentence: text
+        })
+        return analysis.data;
+    }
+}
+
 // Get subtitles for a given Program ID
 router.get('/subtitles', async (ctx, next) => {
     const programid = ctx.request.query.programid
 
     if(programid) {
+        const subtitles = await get_subtitles_from_programid(programid);
+
         ctx.body = {
-            "subtitles": await get_subtitles_from_programid(programid)
+            "subtitles": subtitles,
+            "tokens": await tokenise(subtitles)
         }
         return;
     }
 
     ctx.body = "";
-})
-
-// Tokenise a sentence to get the POS
-router.get('/tokenise', async (ctx, next) => {
-    const sentencestring = ctx.request.query.sentence
-
-    // Tokenise using python server
-    const analysis = await axios.post(process.env.ANALYSIS_SERVER_PATH, {
-        sentence: sentencestring
-    })
-
-    ctx.body = analysis.data;
 })
 
 // Get similar sentences using tokenisation data
@@ -124,7 +124,7 @@ router.get('/context', async (ctx, next) => {
 
      // Now search through the subtitle analysis and find ones with the same lemma
     const desired_lemma = word_analysis.data.lemma[0]
-    const sentence_with_matching_lemmas = program_subtitle_analysis.filter(analysis => analysis.lemma.includes(desired_lemma))
+    const sentence_with_matching_lemmas = program_subtitle_analysis.filter(analysis => analysis.lemma.includes(desired_lemma) || analysis.tokens.includes(word))
 
     // Also translate the word
     await cache_translation(word);

@@ -1,8 +1,8 @@
-const ContextItem = ({items, target}) => {
+const ContextItem = ({items, target, word}) => {
 
     const sentence = items.tokens.map((token, index) => {
         
-        if(items.lemma[index] === target) return <span class="badge text-white" style={{backgroundColor: "#bf6230", margin: 3}}> {token} </span>
+        if(items.lemma[index] === target || items.tokens[index] === word) return <span class="badge text-white" style={{backgroundColor: "#bf6230", margin: 3}}> {token} </span>
         
         return `${token} `
     })

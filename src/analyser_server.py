@@ -1,6 +1,7 @@
 import falcon
 from wsgiref import simple_server
 import spacy
+import json
 from spacy.morphology import Morphology
 
 # Load training for Norwegan Bokmål
@@ -8,12 +9,18 @@ nlp = spacy.load("nb_core_news_sm")
 
 class Analyser:
     def on_post(self, req, resp):
-        resp.media = analyse_sentence(req.media['sentence'])
+        # Bulk sentence analysis
+        if 'sentences' in req.media:
+            resp.media = list(map(analyse_sentence, req.media['sentences']));
+        # Single sentence analysis
+        elif 'sentence' in req.media:
+            resp.media = analyse_sentence(req.media['sentence'])
 
 def analyse_sentence(sentence):
     doc = nlp(sentence)
 
     response = {
+        'raw': sentence,
         'tokens': [],
         'lemma': [],
         'pos': [],
