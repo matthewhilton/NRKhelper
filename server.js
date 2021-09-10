@@ -18,20 +18,6 @@ const router = new Router();
 
 childprocess.spawn('python', ['./src/analyser_server.py']);
 
-// Convert NRK Video URL to Program ID (used in other API's)
-router.get('/programid', async (ctx, next) => {
-    const nrkurl = ctx.request.query.url
-
-    if(nrkurl) {
-        const data = await extract_program_data(nrkurl);
-        ctx.body = data;
-        return;
-    }
-
-    ctx.status = 500;
-    ctx.body = "";
-})
-
 const get_subtitles_from_programid = async (programid) => {
     const subtitleurl = `http://psapi-granitt-prod-we.cloudapp.net/programs/${programid}/subtitles/tt`;
     const response = await axios.get(subtitleurl)
@@ -88,6 +74,20 @@ const tokenise = async (text) => {
     }
 }
 
+// Convert NRK Video URL to Program ID (used in other API's)
+router.get('/programid', async (ctx, next) => {
+    const nrkurl = ctx.request.query.url
+
+    if(nrkurl) {
+        const data = await extract_program_data(nrkurl);
+        ctx.body = data;
+        return;
+    }
+
+    ctx.status = 500;
+    ctx.body = "";
+})
+
 // Get subtitles for a given Program ID
 router.get('/subtitles', async (ctx, next) => {
     const programid = ctx.request.query.programid
@@ -107,7 +107,6 @@ router.get('/subtitles', async (ctx, next) => {
 
 // Get similar sentences using tokenisation data
 router.get('/context', async (ctx, next) => {
-
     const word = ctx.request.query.word
     const programid = ctx.request.query.programid
 
