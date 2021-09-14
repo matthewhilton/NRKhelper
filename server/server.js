@@ -152,7 +152,7 @@ router.post('/translate', async (ctx, next) => {
 })
 
 const static_pages = new Koa();
-static_pages.use(serve("./src/frontend/nrkhelper-frontend/build"));
+static_pages.use(serve("../nrkhelper-frontend/build"));
 
 app.use(cors());
 app.use(mount("/", static_pages));

@@ -9,11 +9,18 @@ RUN pip3 install --upgrade spacy
 RUN python -m spacy download nb_core_news_sm
 
 # Copy package.json and install dependencies
-COPY package.json ./
+RUN mkdir /usr/src/app/server
+RUN mkdir -p /usr/src/app/nrkhelper-frontend/build
+
+COPY ./server/package.json /usr/src/app/server
+
+WORKDIR /usr/src/app/server
+
 RUN npm install --production
 
 # Copy everything else
-COPY . .
+COPY ./server /usr/src/app/server
+COPY ./nrkhelper-frontend/build /usr/src/app/nrkhelper-frontend/build
 
 EXPOSE 80
 
